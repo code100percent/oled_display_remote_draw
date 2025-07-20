@@ -1,0 +1,44 @@
+body{
+    background-color: gray;
+    margin: 0;
+    padding:0;
+}
+.main{
+    display: flex;
+    padding: 50px;
+    align-items: center;
+    justify-content: space-around;
+
+}
+
+.interaction-panel{
+    padding: 0;
+}
+
+#oled_clone{
+    display: inline-flex;
+    flex-direction: column;
+    border: 5px white solid;
+    
+}
+.pixel-row{
+    display: flex;
+    flex-direction: row;
+    
+}
+.pixel{
+    width: 5px;
+    height:5px;
+    background-color: black;
+    border-radius: 2px;
+    border: 1px white solid;
+
+}
+/* .pixel:hover{
+    background-color: lightblue;
+} */
+
+.main-heading{
+    color: white;
+    text-align: center;
+}

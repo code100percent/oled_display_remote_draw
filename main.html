@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title>Document</title>
+</head>
+<body>
+    <h1 class="main-heading">oled 1306 (128*64)</h1>
+    <div class="main">
+        <div id = "oled_clone"> </div>
+        <div class="interaction-panel">
+            <form id="data-send-form" action="POST">
+                <button type="submit">cast</button>
+            </form>
+        </div>
+
+    </div>
+    <script src="main.js"></script>
+    <script>
+        const csrftoken = getCookie('csrftoken');
+        console.log(csrftoken)
+
+        let colored_pixel_color = 'white';
+        const oled_clone = document.getElementById("oled_clone");
+
+        for(let row_no = 0 ; row_no < 64 ; row_no++){
+            row_id=`row-${row_no}`;
+            oled_clone.innerHTML += `<div id ="${row_id}" class="pixel-row"></div>`;
+            const div = document.getElementById(row_id);
+            for(let column_no = 0 ; column_no <128; column_no++){
+                pixel_id = `pix-${row_no}-${column_no}`;
+                div.innerHTML+= `<div id ="${pixel_id}" class="pixel"></div>`;
+            }
+        }
+
+        //coloring pixels
+        for(let row_no = 0 ; row_no<64; row_no++){
+            for(let column_no=0; column_no<128 ; column_no++){
+                pixel_id = `pix-${row_no}-${column_no}`;
+                const pixel = document.getElementById(pixel_id);
+                pixel.addEventListener('click',function(event){
+                    if(event.button===0){
+                        pixel.style.background = colored_pixel_color;
+                    }
+                });
+            }
+        }
+
+        const myform = document.getElementById('data-send-form');
+        myform.addEventListener('submit',event => {
+            event.preventDefault();
+            const colored_pixels = [];
+            for(let row_no = 0 ; row_no<64; row_no++){
+                for(let column_no=0; column_no<128 ; column_no++){
+                    pixel_id = `pix-${row_no}-${column_no}`;
+                    const pixel = document.getElementById(pixel_id);
+                    if (pixel.style.background === colored_pixel_color){
+                        let pixel_loc = [column_no,row_no];
+                        colored_pixels.push(pixel_loc);
+                    }
+                }
+            }
+
+            const data = {pixels:colored_pixels};     
+            console.log(JSON.stringify(data));
+            fetch('http://localhost:8000/api/oled_api',{
+                method:'POST',
+                 headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken, 
+             },
+                body: JSON.stringify(data),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    const contentType = response.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                    throw new TypeError("Expected JSON, but got something else");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                })
+
+                        });
+
+    </script>
+</body>
+
+</html>
